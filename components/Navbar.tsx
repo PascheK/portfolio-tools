@@ -4,39 +4,37 @@ import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
-import ThemeToggle from "./theme/ToggleTheme";
+import ThemeToggle from "@/components/theme/ToggleTheme";
+import NavLink from "@/components/NavLink";
+import { AuthButton } from "./AuthButton";
 
 export default function Navbar() {
   const { user, login, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-
   const toggleSidebar = () => setIsOpen((prev) => !prev);
   const closeSidebar = () => setIsOpen(false);
 
   return (
     <>
-      {/* Navbar top */}
-      <nav className="transition-colors bg-background  dark:bg-dark-background text-text  dark:text-dark-text px-4 py-3 shadow-md flex justify-between items-center">
+      {/* Top navigation bar */}
+      <nav className="transition-colors bg-background dark:bg-dark-background text-text dark:text-dark-text px-4 py-3 shadow-md flex justify-between items-center">
         <Link href="/" className="text-xl font-bold">
-          Portfolio
+          Compass Landing Page
         </Link>
 
-        {/* Desktop nav */}
+        {/* Desktop navigation */}
         <div className="hidden md:flex gap-4 items-center">
-          {user && <Link href="/admin" className="hover:underline">Admin</Link>}
-          {user ? (
-            <button onClick={logout} className="bg-danger hover:bg-red-600 px-3 py-1 rounded">
-              Déconnexion
-            </button>
-          ) : (
-            <button onClick={login} className="bg-primary hover:bg-blue-600 px-3 py-1 rounded">
-              Connexion
-            </button>
+          <NavLink href="/">Home</NavLink>
+          {user && (
+            <NavLink href="/admin">My projects</NavLink>
+
           )}
-           <ThemeToggle/>
+             <ThemeToggle />
+          <AuthButton user={user} login={login} logout={logout} closeSidebar={closeSidebar} />
+       
         </div>
 
-        {/* Burger icon for mobile */}
+        {/* Mobile menu button */}
         <div className="md:hidden">
           <button onClick={toggleSidebar} aria-label="Menu">
             <Menu size={28} />
@@ -44,17 +42,17 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Overlay (fond noir semi-transparent) */}
+      {/* Overlay background when mobile menu is open */}
       {isOpen && (
         <div
           onClick={closeSidebar}
-          className="fixed inset-0 transition-colors bg-dark-background/60  dark:bg-background/60  z-40 md:hidden backdrop-blur-sm"
-        ></div>
+          className="fixed inset-0 transition-colors bg-dark-background/60 z-40 md:hidden backdrop-blur-sm"
+        />
       )}
 
-      {/* Sidebar menu */}
+      {/* Sidebar menu for mobile */}
       <aside
-        className={`fixed top-0 right-0 h-full w-64 transition-all bg-background dark:bg-dark-background text-text  dark:text-dark-text z-50 transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-64 transition-all bg-background dark:bg-dark-background text-text dark:text-dark-text z-50 transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "translate-x-full"
         } md:hidden`}
       >
@@ -65,37 +63,18 @@ export default function Navbar() {
           </button>
         </div>
 
-        <div className="flex flex-col p-4 space-y-4">
-          <Link onClick={closeSidebar} href="/" className="hover:underline">
-            Accueil
-          </Link>
+        <div className="flex flex-col justify-between min-h-[95vh] max-h-screen p-4 ">
+          <div className="flex flex-col items-center justify-between space-y-4">
+          <NavLink href="/">Home</NavLink>
           {user && (
-            <Link onClick={closeSidebar} href="/admin" className="hover:underline">
-              Admin
-            </Link>
+          <NavLink href="/admin">My projects</NavLink>
           )}
-          {user ? (
-            <button
-              onClick={() => {
-                logout();
-                closeSidebar();
-              }}
-              className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded"
-            >
-              Déconnexion
-            </button>
-          ) : (
-            <button
-              onClick={() => {
-                login();
-                closeSidebar();
-              }}
-              className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded"
-            >
-              Connexion
-            </button>
-          )}
-          <ThemeToggle/>
+       </div>
+       <div className="flex flex-col items-end justify-between space-y-4 mt-4">
+            <ThemeToggle />
+            <AuthButton user={user} login={login} logout={logout} closeSidebar={closeSidebar} />
+      
+          </div>
         </div>
       </aside>
     </>

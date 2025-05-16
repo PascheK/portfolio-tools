@@ -18,7 +18,7 @@ This is a modern, full-stack portfolio management application built with **Next.
 
 ## 🛠️ Tech Stack
 
-- [Next.js 14+](https://nextjs.org/)
+- [Next.js 15+](https://nextjs.org/)
 - [TypeScript](https://www.typescriptlang.org/)
 - [Firebase (Auth, Firestore, Storage)](https://firebase.google.com/)
 - [Tailwind CSS v4](https://tailwindcss.com/)

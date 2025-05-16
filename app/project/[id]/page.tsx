@@ -1,23 +1,16 @@
-// app/project/[id]/page.tsx
-
 import { getProjectById } from "@/services/projects";
 import { notFound } from "next/navigation";
-import { Project } from "@/models/project";
 import { ExternalLink } from "lucide-react";
 
-interface ProjectPageProps {
-  params: { id: string };
-}
-
-const ProjectPage = async ({ params }: ProjectPageProps) => {
-  const project: Project | null = await getProjectById(params.id);
+export default async function ProjectPage({params}: {params: Promise<{ id: string }>}) {
+  const project = await getProjectById((await params).id);
 
   if (!project) return notFound();
 
   return (
     <main className="max-w-4xl mx-auto py-10 px-4">
       <div className="space-y-6 border border-border dark:border-dark-border rounded bg-background dark:bg-dark-background p-6">
-        {/* Titre et catégorie */}
+        {/* Title & Category */}
         <div>
           <h1 className="text-3xl font-bold text-text dark:text-dark-text">
             {project.title}
@@ -27,21 +20,21 @@ const ProjectPage = async ({ params }: ProjectPageProps) => {
           </span>
         </div>
 
-        {/* Image de couverture */}
+        {/* Cover Image */}
         {project.image && (
           <img
             src={project.image}
-            alt="Image de couverture"
+            alt="Cover"
             className="w-full max-h-[400px] object-cover rounded shadow"
           />
         )}
 
-        {/* Description courte */}
+        {/* Short Description */}
         <div className="text-text dark:text-dark-text">
           <p>{project.description}</p>
         </div>
 
-        {/* Description enrichie */}
+        {/* Full Description */}
         {project.fullDescription && (
           <div
             className="prose dark:prose-invert max-w-none"
@@ -49,10 +42,10 @@ const ProjectPage = async ({ params }: ProjectPageProps) => {
           />
         )}
 
-        {/* Galerie */}
-        {project.images && project.images.length > 0 && (
+        {/* Gallery */}
+        {Array.isArray(project.images) && project.images.length > 0 && (
           <div>
-            <h2 className="text-xl font-semibold mb-2 text-text dark:text-dark-text">Galerie</h2>
+            <h2 className="text-xl font-semibold mb-2 text-text dark:text-dark-text">Gallery</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {project.images.map((url, idx) => (
                 <img
@@ -66,7 +59,7 @@ const ProjectPage = async ({ params }: ProjectPageProps) => {
           </div>
         )}
 
-        {/* Lien externe */}
+        {/* External Link */}
         {project.url && (
           <a
             href={project.url}
@@ -74,11 +67,10 @@ const ProjectPage = async ({ params }: ProjectPageProps) => {
             rel="noreferrer"
             className="flex items-center gap-2 text-primary hover:text-primary-hover underline"
           >
-            <ExternalLink className="w-5 h-5" /> Voir l'application
+            <ExternalLink className="w-5 h-5" /> Visit Application
           </a>
         )}
       </div>
     </main>
   );
 }
-export default ProjectPage;

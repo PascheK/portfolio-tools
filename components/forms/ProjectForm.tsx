@@ -1,5 +1,11 @@
 import { useRef, useState, useEffect } from "react";
-import { Trash2, ImagePlus, Image, ChevronUp, ChevronDown } from "lucide-react";
+import {
+  Trash2,
+  ImagePlus,
+  Image,
+  ChevronUp,
+  ChevronDown,
+} from "lucide-react";
 import RichTextEditor from "@/components/rich-text-editor/RichTextEditor";
 import { Project } from "@/models/project";
 
@@ -32,16 +38,18 @@ export default function ProjectForm({
   const coverInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [previewTitle, setPreviewTitle] = useState<string>("Aperçu");
+  const [previewTitle, setPreviewTitle] = useState<string>("Preview");
   const [existingGallery, setExistingGallery] = useState<string[]>(form.images || []);
   const [existingCover, setExistingCover] = useState<string | null>(form.image || null);
 
+  // Handle form field updates
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  // Handle file input change for cover image
   useEffect(() => {
     const input = coverInputRef.current;
     if (!input) return;
@@ -56,6 +64,7 @@ export default function ProjectForm({
     return () => input.removeEventListener("change", handleFile);
   }, []);
 
+  // Handle file input change for gallery
   useEffect(() => {
     const input = galleryInputRef.current;
     if (!input) return;
@@ -67,6 +76,7 @@ export default function ProjectForm({
     return () => input.removeEventListener("change", handleFiles);
   }, []);
 
+  // Update local state when editing an existing project
   useEffect(() => {
     setExistingGallery(form.images || []);
     setExistingCover(form.image || null);
@@ -81,10 +91,10 @@ export default function ProjectForm({
           onSubmit();
         }}
       >
-        {/* Titre */}
+        {/* Project title */}
         <div>
           <label className="block text-sm font-medium mb-1 text-text dark:text-dark-text">
-            Titre du projet
+            Project title
           </label>
           <input
             type="text"
@@ -92,14 +102,14 @@ export default function ProjectForm({
             value={form.title || ""}
             onChange={handleChange}
             className="w-full px-4 py-2 rounded border border-border dark:border-dark-border bg-transparent text-text dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-primary"
-            placeholder="Ex. : Outil interne de reporting"
+            placeholder="e.g. Internal reporting tool"
           />
         </div>
 
-        {/* Description */}
+        {/* Short description */}
         <div>
           <label className="block text-sm font-medium mb-1 text-text dark:text-dark-text">
-            Description
+            Short description
           </label>
           <textarea
             name="description"
@@ -110,41 +120,42 @@ export default function ProjectForm({
           />
         </div>
 
-        {/* URL du projet */}
+        {/* Project URL */}
         <div>
           <label className="block text-sm font-medium mb-1 text-text dark:text-dark-text">
-            Lien vers l'application
+            Application URL
           </label>
           <input
             type="url"
             name="url"
             value={form.url || ""}
             onChange={handleChange}
-            placeholder="https://mon-app.example.com"
+            placeholder="https://your-app.example.com"
             className="w-full px-4 py-2 rounded border border-border dark:border-dark-border bg-transparent text-text dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
 
-        {/* Ligne outils */}
+        {/* Tools section: Rich text editor, category, cover image, gallery */}
         <div className="flex flex-wrap gap-4 items-end">
-          {/* Editeur enrichi */}
+
+          {/* Rich text editor trigger */}
           <div className="flex-1 min-w-[200px]">
             <label className="block text-sm font-medium mb-1 text-text dark:text-dark-text">
-              Description complète
+              Full description
             </label>
             <button
               type="button"
               onClick={() => setShowRichEditor(true)}
               className="w-full px-4 py-2 rounded bg-primary text-white hover:bg-primary-hover transition flex items-center gap-2 justify-center"
             >
-              <ImagePlus size={18} /> Ouvrir l'éditeur enrichi
+              <ImagePlus size={18} /> Open the rich text editor
             </button>
           </div>
 
-          {/* Catégorie */}
+          {/* Category selection */}
           <div className="flex-1 min-w-[200px]">
             <label className="block text-sm font-medium mb-1 text-text dark:text-dark-text">
-              Catégorie
+              Category
             </label>
             <select
               name="category"
@@ -152,25 +163,28 @@ export default function ProjectForm({
               onChange={handleChange}
               className="w-full px-4 py-2 rounded border border-border dark:border-dark-border text-text dark:text-dark-text appearance-none focus:outline-none focus:ring-2 focus:ring-primary bg-background dark:bg-dark-surface"
             >
-              <option value="">Choisir une catégorie</option>
-              <option value="outil">Outil</option>
-              <option value="dashboard">Dashboard</option>
-              <option value="automatisation">Automatisation</option>
+              <option value="">Select a category</option>
+              <option value="apps">Apps</option>
+              <option value="dashboards">Dashboard</option>
+              <option value="templates">Templates</option>
+              <option value="tools">Tools</option>
             </select>
           </div>
 
-          {/* Image de couverture */}
+          {/* Cover image */}
           <div className="flex-1 min-w-[200px]">
             <label className="block text-sm font-medium mb-1 text-text dark:text-dark-text">
-              Image de couverture
+              Cover image
             </label>
+
             {coverFile ? (
+              // Preview of newly selected cover file
               <div className="flex flex-col gap-2">
                 <button
                   type="button"
                   onClick={() => {
                     setPreviewUrl(URL.createObjectURL(coverFile));
-                    setPreviewTitle("Aperçu de la couverture");
+                    setPreviewTitle("Cover preview");
                   }}
                   className="text-sm text-green-600 flex items-center gap-1 underline hover:text-green-700"
                 >
@@ -181,50 +195,53 @@ export default function ProjectForm({
                   onClick={() => setCoverFile(null)}
                   className="flex items-center justify-center gap-1 px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 transition"
                 >
-                  <Trash2 size={16} /> Supprimer
+                  <Trash2 size={16} /> Remove
                 </button>
               </div>
             ) : existingCover ? (
+              // Display existing uploaded cover image
               <div className="flex flex-col gap-2">
                 <button
                   type="button"
                   onClick={() => {
                     setPreviewUrl(existingCover);
-                    setPreviewTitle("Image de couverture enregistrée");
+                    setPreviewTitle("Current cover image");
                   }}
                   className="text-sm text-green-600 flex items-center gap-1 underline hover:text-green-700"
                 >
-                  <Image size={16} /> Voir l'image actuelle
+                  <Image size={16} /> View current image
                 </button>
               </div>
             ) : (
+              // No cover yet – open file selector
               <button
                 type="button"
                 onClick={() => coverInputRef.current?.click()}
                 className="w-full px-4 py-2 rounded bg-primary text-white hover:bg-primary-hover transition flex items-center gap-2 justify-center"
               >
-                <ImagePlus size={18} /> Ajouter une image principale
+                <ImagePlus size={18} /> Add a cover image
               </button>
             )}
             <input type="file" accept="image/*" ref={coverInputRef} hidden />
           </div>
-
-          {/* Galerie d’images */}
-                  <div className="flex-1 min-w-[200px]">
+          
+          {/* Gallery images */}
+          <div className="flex-1 min-w-[200px]">
             <label className="block text-sm font-medium mb-1 text-text dark:text-dark-text">
-              Autres images
+              Additional images
             </label>
             <div className="max-h-56 overflow-y-auto pr-1 space-y-2 mb-2">
               {[...existingGallery, ...galleryFiles].map((item, index) => {
                 const isFile = item instanceof File;
                 const name = isFile ? item.name : item.split("/").pop() ?? "Image";
                 const preview = isFile ? URL.createObjectURL(item) : item;
-
+              
                 return (
                   <div
                     key={index}
                     className="flex items-center justify-between gap-2 px-3 py-2 rounded border border-border dark:border-dark-border bg-surface dark:bg-dark-surface"
                   >
+                    {/* Image name and preview trigger */}
                     <button
                       type="button"
                       onClick={() => {
@@ -236,7 +253,10 @@ export default function ProjectForm({
                     >
                       {name}
                     </button>
+                    
+                    {/* Reorder and delete buttons */}
                     <div className="flex items-center gap-1">
+                      {/* Move up */}
                       <button
                         type="button"
                         disabled={index === 0}
@@ -246,10 +266,12 @@ export default function ProjectForm({
                           setGalleryFiles(updated);
                         }}
                         className="p-1 rounded bg-background dark:bg-dark-background border hover:bg-surface dark:hover:bg-dark-surface"
-                        title="Monter"
+                        title="Move up"
                       >
                         <ChevronUp className="w-4 h-4" />
                       </button>
+                      
+                      {/* Move down */}
                       <button
                         type="button"
                         disabled={index === galleryFiles.length - 1}
@@ -259,10 +281,12 @@ export default function ProjectForm({
                           setGalleryFiles(updated);
                         }}
                         className="p-1 rounded bg-background dark:bg-dark-background border hover:bg-surface dark:hover:bg-dark-surface"
-                        title="Descendre"
+                        title="Move down"
                       >
                         <ChevronDown className="w-4 h-4" />
                       </button>
+                      
+                      {/* Delete */}
                       <button
                         type="button"
                         onClick={() => {
@@ -273,7 +297,7 @@ export default function ProjectForm({
                           }
                         }}
                         className="p-1 bg-red-600 text-white rounded hover:bg-red-700"
-                        title="Supprimer"
+                        title="Delete"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -282,40 +306,43 @@ export default function ProjectForm({
                 );
               })}
             </div>
+            
+            {/* Button to add more gallery images */}
             <button
               type="button"
               onClick={() => galleryInputRef.current?.click()}
               className="w-full px-4 py-2 rounded border border-border dark:border-dark-border text-text dark:text-dark-text hover:bg-[oklch(var(--color-border))] transition flex items-center gap-2 justify-center"
             >
-              <ImagePlus size={18} /> Ajouter des photos
+              <ImagePlus size={18} /> Add more images
             </button>
             <input type="file" accept="image/*" multiple ref={galleryInputRef} hidden />
           </div>
         </div>
 
-        {/* Bouton soumettre */}
+            
+        {/* Submit button */}
         <div className="pt-4">
           <button
             type="submit"
             disabled={isSubmitting}
             className="w-full px-4 py-2 rounded bg-primary text-white hover:bg-primary-hover font-semibold transition"
           >
-            Enregistrer le projet
+            Save project
           </button>
         </div>
       </form>
 
-      {/* Modales */}
-            {showRichEditor && (
+      {/* Rich text modal */}
+      {showRichEditor && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
           <div className="relative bg-dark-surface rounded-lg shadow-lg w-full max-w-[95vw] h-[95vh] animate-zoom-in flex flex-col">
             <div className="flex justify-between items-center px-6 py-4 border-b border-dark-border">
-              <h2 className="text-lg font-semibold text-white">Contenu enrichi</h2>
+              <h2 className="text-lg font-semibold text-white">Rich content editor</h2>
               <button
                 onClick={() => setShowRichEditor(false)}
                 className="text-sm bg-red-600 px-4 py-1 rounded hover:bg-red-700 text-white"
               >
-                Fermer
+                Close
               </button>
             </div>
             <div className="p-6 h-full overflow-auto">
@@ -325,6 +352,7 @@ export default function ProjectForm({
         </div>
       )}
 
+      {/* Preview modal */}
       {previewUrl && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm"
@@ -334,14 +362,14 @@ export default function ProjectForm({
             <h2 className="text-white text-lg mb-2">{previewTitle}</h2>
             <img
               src={previewUrl}
-              alt="Aperçu"
+              alt="Preview"
               className="w-full max-h-[75vh] object-contain mx-auto rounded"
             />
             <button
               onClick={() => setPreviewUrl(null)}
               className="absolute top-4 right-4 bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700"
             >
-              Fermer
+              Close
             </button>
           </div>
         </div>

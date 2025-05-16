@@ -41,43 +41,42 @@ export default function AdminPage() {
     }
   }, [user, loading]);
 
-  // Fetch projects owned by the current user
+  // Listen to the authenticated user's projects
   useEffect(() => {
     if (!user) return;
     const unsubscribe = listenToUserProjects(user.uid, setProjects);
     return () => unsubscribe();
   }, [user]);
 
-  if (loading) return <p>Chargement...</p>;
-  if (!user) return <p>Accès refusé.</p>;
+  if (loading) return <p>Loading...</p>;
+  if (!user) return <p>Access denied.</p>;
 
-  // Handle project form submission
+  // Handles project creation and update
   const handleSubmit = async () => {
     if (!form.title || !form.description || !form.category || !user) {
-      showToast("Veuillez remplir tous les champs requis.", "error");
+      showToast("Please fill all required fields.", "error");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      // Image principale
-let imageUrl: string | undefined = form.image || undefined;
-if (coverFile) {
-  imageUrl = await uploadImage(coverFile, `projects/${user.uid}/cover-${Date.now()}`);
-}
+      // Upload cover image if changed
+      let imageUrl: string | undefined = form.image || undefined;
+      if (coverFile) {
+        imageUrl = await uploadImage(coverFile, `projects/${user.uid}/cover-${Date.now()}`);
+      }
 
-// Galerie d’images
-let imageUrls: string[] = form.images || [];
-if (galleryFiles.length > 0) {
-  const uploaded = await Promise.all(
-    galleryFiles.map((file) =>
-      uploadImage(file, `projects/${user.uid}/gallery/${Date.now()}-${file.name}`)
-    )
-  );
-  imageUrls = [...imageUrls, ...uploaded];
-}
+      // Upload new gallery images
+      let imageUrls: string[] = form.images || [];
+      if (galleryFiles.length > 0) {
+        const uploaded = await Promise.all(
+          galleryFiles.map((file) =>
+            uploadImage(file, `projects/${user.uid}/gallery/${Date.now()}-${file.name}`)
+          )
+        );
+        imageUrls = [...imageUrls, ...uploaded];
+      }
 
-      // Construct the project object
       const newProjectData: Omit<Project, "id" | "createdAt" | "ownerUID"> = {
         title: form.title,
         description: form.description,
@@ -91,14 +90,14 @@ if (galleryFiles.length > 0) {
 
       if (editId) {
         await updateProject(editId, newProjectData);
-        showToast("Projet modifié", "success");
+        showToast("Project updated successfully", "success");
       } else {
         await createProject(newProjectData, user.uid);
-        showToast("Projet ajouté", "success");
+        showToast("Project created successfully", "success");
       }
     } catch (error) {
-      console.error("Error uploading files or creating project:", error);
-      showToast("Erreur lors de l'ajout du projet", "error");
+      console.error("Error while uploading or saving project:", error);
+      showToast("Failed to save project", "error");
     } finally {
       setIsSubmitting(false);
       setForm({});
@@ -110,7 +109,7 @@ if (galleryFiles.length > 0) {
     }
   };
 
-  // Handle project editing
+  // Load selected project in form for editing
   const handleEdit = (project: Project) => {
     setForm(project);
     setEditId(project.id);
@@ -120,26 +119,25 @@ if (galleryFiles.length > 0) {
     formModal.open();
   };
 
-  // Handle delete request (show confirmation modal)
+  // Ask for confirmation before deletion
   const handleDelete = (id: string) => {
     setDeleteId(id);
     setConfirmOpen(true);
   };
 
-  // Handle confirmation of delete action
+  // Confirm and proceed with project deletion
   const confirmDelete = async () => {
     if (!deleteId) return;
     await deleteProject(deleteId);
     setDeleteId(null);
     setConfirmOpen(false);
-    showToast("Projet supprimé", "success");
+    showToast("Project deleted successfully", "success");
   };
 
   return (
     <div className="max-w-full px-2 mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Mes projets</h1>
+      <h1 className="text-2xl font-bold mb-4">My Projects</h1>
 
-      {/* Add Project Button */}
       <button
         onClick={() => {
           setForm({});
@@ -151,14 +149,14 @@ if (galleryFiles.length > 0) {
         }}
         className="mb-4 px-4 py-2 bg-blue-600 text-white rounded"
       >
-        Ajouter un projet
+        Add a new project
       </button>
 
-      {/* List of user projects */}
+      {/* Display the list of projects */}
       <ProjectList projects={projects} onEdit={handleEdit} onDelete={handleDelete} />
 
-      {/* Modal with project form */}
-      <Modal isOpen={formModal.isOpen} onClose={formModal.close} title="Ajouter un projet">
+      {/* Modal containing the project form */}
+      <Modal isOpen={formModal.isOpen} onClose={formModal.close} title="Add a project">
         <ProjectForm
           form={form}
           setForm={setForm}
@@ -176,7 +174,7 @@ if (galleryFiles.length > 0) {
       {/* Confirmation modal for deletion */}
       <ConfirmModal
         isOpen={confirmOpen}
-        message="Êtes-vous sûr de vouloir supprimer ce projet ? Cette action est irréversible."
+        message="Are you sure you want to delete this project? This action cannot be undone."
         onCancel={() => setConfirmOpen(false)}
         onConfirm={confirmDelete}
       />

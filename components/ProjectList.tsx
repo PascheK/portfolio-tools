@@ -19,37 +19,37 @@ export default function ProjectList({ projects, onEdit, onDelete }: ProjectListP
           onClick={() => router.push(`/project/${project.id}`)}
           className="relative border border-border dark:border-dark-border rounded bg-background dark:bg-dark-background shadow-sm overflow-hidden cursor-pointer"
         >
-          {/* Top buttons */}
+          {/* Top-right edit/delete buttons */}
           <div className="absolute top-2 right-2 z-10 flex gap-2">
             <button
               onClick={(e) => {
-                e.stopPropagation();
+                e.stopPropagation(); // Prevent parent click (open detail page)
                 onEdit(project);
               }}
               className="p-2 rounded transition"
-              title="Modifier"
+              title="Edit"
             >
               <Pencil className="w-5 h-5 text-orange-400 hover:text-orange-500" />
             </button>
             <button
               onClick={(e) => {
-                e.stopPropagation();
+                e.stopPropagation(); // Prevent parent click
                 onDelete(project.id);
               }}
               className="p-2 rounded transition"
-              title="Supprimer"
+              title="Delete"
             >
               <Trash2 className="w-5 h-5 text-red-600 hover:text-red-700" />
             </button>
           </div>
 
-          {/* Cover image */}
+          {/* Project cover image */}
           <div
             className="h-40 w-full bg-cover bg-center"
             style={{ backgroundImage: `url(${project.image || "/placeholder.jpg"})` }}
           />
 
-          {/* Content */}
+          {/* Project content */}
           <div className="p-4">
             <h3 className="text-lg font-bold text-text dark:text-dark-text mb-2">
               {project.title}
@@ -64,6 +64,7 @@ export default function ProjectList({ projects, onEdit, onDelete }: ProjectListP
               {project.category}
             </span>
 
+            {/* Bottom buttons: tool link & project detail */}
             <div className="flex justify-between items-center mt-4">
               {project.url && (
                 <a
@@ -73,7 +74,8 @@ export default function ProjectList({ projects, onEdit, onDelete }: ProjectListP
                   className="flex items-center gap-1 text-primary hover:underline hover:text-primary-hover text-sm"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <ExternalLink className="w-4 h-4" /> Accéder à l’outil
+                  <ExternalLink className="w-4 h-4" />
+                  Visit tool
                 </a>
               )}
               <button
@@ -83,7 +85,7 @@ export default function ProjectList({ projects, onEdit, onDelete }: ProjectListP
                 }}
                 className="text-sm text-primary hover:underline hover:text-primary-hover"
               >
-                Voir le projet
+                View project
               </button>
             </div>
           </div>
