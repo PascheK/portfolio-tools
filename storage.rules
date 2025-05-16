@@ -1,0 +1,14 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Tous les fichiers dans le dossier "projects"
+    match /projects/{userId}/{allPaths=**} {
+      // Tout le monde peut les lire (afficher images)
+      allow read: if true;
+
+      // Seul l’utilisateur concerné peut uploader / modifier / supprimer
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
