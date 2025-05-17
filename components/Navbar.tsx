@@ -9,11 +9,11 @@ import NavLink from "@/components/NavLink";
 import { AuthButton } from "./AuthButton";
 
 export default function Navbar() {
-  const { user, login, logout } = useAuth();
+  const { user, role, login, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const toggleSidebar = () => setIsOpen((prev) => !prev);
   const closeSidebar = () => setIsOpen(false);
-
+  console.log("User in Navbar:", user);
   return (
     <>
       {/* Top navigation bar */}
@@ -25,9 +25,8 @@ export default function Navbar() {
         {/* Desktop navigation */}
         <div className="hidden md:flex gap-4 items-center">
           <NavLink href="/">Home</NavLink>
-          {user && (
+          {(role === 'admin' || role === 'superadmin') && (
             <NavLink href="/admin">My projects</NavLink>
-
           )}
              <ThemeToggle />
           <AuthButton user={user} login={login} logout={logout} closeSidebar={closeSidebar} />

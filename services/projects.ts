@@ -60,15 +60,26 @@ export async function getPublicProjectsPaginated(pageSize = 12, startAfterDoc?: 
 
   return { projects, lastDoc: snapshot.docs[snapshot.docs.length - 1] };
 }
-export const listenToUserProjects = (uid: string, callback: (projects: Project[]) => void) => {
-  const q = query(projectsCollection, where("ownerUID", "==", uid));
-  return onSnapshot(q, (snapshot) => {
-    const data = snapshot.docs.map((doc) => ({
-      ...(doc.data() as Omit<Project, "id">),
+export async function listenToUserProjects(uid: string,): Promise<Project[]>{
+    try {
+    const q = query(
+      collection(db, "projects"),
+      where("ownerUID", "==", uid),
+      where("isPublished", "==", true),
+      orderBy("createdAt", "desc")
+    );
+
+    const snapshot = await getDocs(q);
+
+    return snapshot.docs.map((doc) => ({
       id: doc.id,
+      ...(doc.data() as Omit<Project, "id">),
     }));
-    callback(data);
-  });
+  } catch (error) {
+    console.error("Failed to fetch public projects:", error);
+    return [];
+  }
+
 };
 
 export const createProject = async (data: Omit<Project, "id" | "createdAt" | "ownerUID">, uid: string) => {

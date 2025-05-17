@@ -2,22 +2,28 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Règles pour les projets
+    // 🔒 Projets
     match /projects/{projectId} {
       // Tout le monde peut lire
       allow read: if true;
 
-      // Seuls les utilisateurs connectés peuvent créer un projet
+      // Seuls les utilisateurs connectés peuvent créer
       allow create: if request.auth != null;
 
-      // Seul le propriétaire peut modifier ou supprimer
-      allow update, delete: if request.auth != null
-        && request.auth.uid == resource.data.ownerUID;
-    }
-        // Utilisateurs : lecture/écriture seulement pour l'utilisateur lui-même
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Autoriser update/delete si :
+      // - l'utilisateur est le propriétaire
+      // - OU il a le rôle "superadmin" dans la collection users
+      allow update, delete: if request.auth != null &&
+        (
+          request.auth.uid == resource.data.ownerUID ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "superadmin"
+        );
     }
 
+    // 🔒 Utilisateurs
+    match /users/{userId} {
+      // Un utilisateur ne peut lire/écrire que son propre document
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
   }
 }

@@ -334,10 +334,10 @@ export default function ProjectForm({
 
       {/* Rich text modal */}
       {showRichEditor && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
-          <div className="relative bg-dark-surface rounded-lg shadow-lg w-full max-w-[95vw] h-[95vh] animate-zoom-in flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="relative bg-surface dark:bg-dark-surface  rounded-lg shadow-lg w-full max-w-[95vw] h-[95vh] animate-zoom-in flex flex-col">
             <div className="flex justify-between items-center px-6 py-4 border-b border-dark-border">
-              <h2 className="text-lg font-semibold text-white">Rich content editor</h2>
+              <h2 className="text-lg font-semibold text-text dark:text-dark-text">Rich content editor</h2>
               <button
                 onClick={() => setShowRichEditor(false)}
                 className="text-sm bg-red-600 px-4 py-1 rounded hover:bg-red-700 text-white"

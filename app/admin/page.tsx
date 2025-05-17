@@ -8,6 +8,7 @@ import {
   createProject,
   updateProject,
   deleteProject,
+  getAllProjects
 } from "@/services/projects";
 import { uploadImage } from "@/services/upload";
 import { Project } from "@/models/project";
@@ -18,8 +19,9 @@ import ProjectForm from "@/components/forms/ProjectForm";
 import ProjectList from "@/components/ProjectList";
 import ConfirmModal from "@/components/modals/ConfirmModal";
 
+
 export default function AdminPage() {
-  const { user, loading } = useAuth();
+  const { user, loading, role } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [form, setForm] = useState<Partial<Project>>({});
   const [editId, setEditId] = useState<string | null>(null);
@@ -36,17 +38,28 @@ export default function AdminPage() {
 
   // Redirect to login if not authenticated
   useEffect(() => {
+     if(role === 'visitor'){
+        router.push("/");
+      }
     if (!loading && !user) {
-      router.push("/login");
+             router.push("/");
     }
   }, [user, loading]);
 
   // Listen to the authenticated user's projects
   useEffect(() => {
-    if (!user) return;
-    const unsubscribe = listenToUserProjects(user.uid, setProjects);
-    return () => unsubscribe();
-  }, [user]);
+    const fetchProjects = async () => {
+      if (!user) return;
+      if (role === 'superadmin'){
+        const projects = await getAllProjects();
+        setProjects(projects);
+      } else {
+        const projects = await listenToUserProjects(user.uid);
+        setProjects(projects);
+      }
+    };
+    fetchProjects();
+  }, [user, role]);
 
   if (loading) return <p>Loading...</p>;
   if (!user) return <p>Access denied.</p>;
