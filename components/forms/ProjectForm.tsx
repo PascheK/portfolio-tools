@@ -352,7 +352,7 @@ export default function ProjectForm({
                 Close
               </button>
             </div>
-            <div className="p-6 h-full overflow-auto">
+            <div className="p-6 h-full">
               <RichTextEditor content={richContent} onChange={setRichContent} />
             </div>
           </div>

@@ -14,6 +14,7 @@ import {
   LinkIcon,
   List,
   ListOrdered,
+  Palette,
   Redo,
   Strikethrough,
   TextQuote,
@@ -40,102 +41,115 @@ const Options = [
   {
     icon: <Heading1 className="size-4" />,
     onClick: () => editor.chain().focus().toggleHeading({ level: 1 }).run(),
-    preesed: editor.isActive("heading", { level: 1 }),
+    pressed: editor.isActive("heading", { level: 1 }),
   },
   {
     icon: <Heading2 className="size-4" />,
     onClick: () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
-    preesed: editor.isActive("heading", { level: 2 }),
+    pressed: editor.isActive("heading", { level: 2 }),
   },
   {
     icon: <Heading3 className="size-4" />,
     onClick: () => editor.chain().focus().toggleHeading({ level: 3 }).run(),
-    preesed: editor.isActive("heading", { level: 3 }),
+    pressed: editor.isActive("heading", { level: 3 }),
   },
 
   // Text styles
   {
     icon: <Bold className="size-4" />,
     onClick: () => editor.chain().focus().toggleBold().run(),
-    preesed: editor.isActive("bold"),
+    pressed: editor.isActive("bold"),
   },
   {
     icon: <Italic className="size-4" />,
     onClick: () => editor.chain().focus().toggleItalic().run(),
-    preesed: editor.isActive("italic"),
+    pressed: editor.isActive("italic"),
   },
   {
     icon: <Underline className="size-4" />,
     onClick: () => editor.chain().focus().toggleUnderline().run(),
-    preesed: editor.isActive("underline"),
+    pressed: editor.isActive("underline"),
   },
   {
     icon: <Strikethrough className="size-4" />,
     onClick: () => editor.chain().focus().toggleStrike().run(),
-    preesed: editor.isActive("strike"),
+    pressed: editor.isActive("strike"),
   },
   {
     icon: <Highlighter className="size-4" />,
     onClick: () => editor.chain().focus().toggleHighlight().run(),
-    preesed: editor.isActive("highlight"),
+    pressed: editor.isActive("highlight"),
   },
-
+  {
+    icon: (
+      <input
+        type="color"
+        className="w-6 h-6 p-0 border-none bg-transparent cursor-pointer"
+        onChange={(e) => {
+          editor.chain().focus().setColor(e.target.value).run();
+        }}
+        title="Set text color"
+      />
+  ),
+  onClick: () => {},
+  pressed: false,
+  },
   // Text alignment
   {
     icon: <AlignLeft className="size-4" />,
     onClick: () => editor.chain().focus().setTextAlign("left").run(),
-    preesed: editor.isActive({ textAlign: "left" }),
+    pressed: editor.isActive({ textAlign: "left" }),
   },
   {
     icon: <AlignCenter className="size-4" />,
     onClick: () => editor.chain().focus().setTextAlign("center").run(),
-    preesed: editor.isActive({ textAlign: "center" }),
+    pressed: editor.isActive({ textAlign: "center" }),
   },
   {
     icon: <AlignRight className="size-4" />,
     onClick: () => editor.chain().focus().setTextAlign("right").run(),
-    preesed: editor.isActive({ textAlign: "right" }),
+    pressed: editor.isActive({ textAlign: "right" }),
   },
 
   // Lists
   {
     icon: <List className="size-4" />,
     onClick: () => editor.chain().focus().toggleBulletList().run(),
-    preesed: editor.isActive("bulletList"),
+    pressed: editor.isActive("bulletList"),
   },
   {
     icon: <ListOrdered className="size-4" />,
     onClick: () => editor.chain().focus().toggleOrderedList().run(),
-    preesed: editor.isActive("orderedList"),
+    pressed: editor.isActive("orderedList"),
   },
 
   // Blocks & code
   {
     icon: <TextQuote className="size-4" />,
     onClick: () => editor.chain().focus().toggleBlockquote().run(),
-    preesed: editor.isActive("blockquote"),
+    pressed: editor.isActive("blockquote"),
   },
   {
     icon: <Code className="size-4" />,
     onClick: () => editor.chain().focus().toggleCodeBlock().run(),
-    preesed: editor.isActive("codeBlock"),
+    pressed: editor.isActive("codeBlock"),
   },
 
   // Utility actions
   {
     icon: <Undo className="size-4" />,
     onClick: () => editor.chain().focus().undo().run(),
-    preesed: false,
+    pressed: false,
   },
   {
     icon: <Redo className="size-4" />,
     onClick: () => editor.chain().focus().redo().run(),
-    preesed: false,
+    pressed: false,
   },
   {
     icon: <Eraser className="size-4" />,
     onClick: () => editor.chain().focus().unsetAllMarks().clearNodes().run(),
-    preesed: false,
+    pressed: false,
   },
   {
     icon: <LinkIcon className="size-4" />,
@@ -160,8 +174,9 @@ const Options = [
         editor.chain().focus().setImage({ src: url }).run();
       };
     },
-    preesed: false,
+    pressed: false,
   },
+  
 ];
 
 
@@ -170,7 +185,7 @@ const Options = [
       {Options.map((option, index) => (
         <Toggle
           key={index}
-          pressed={option.preesed}
+          pressed={option.pressed}
           onPressedChange={option.onClick}
         >
           {option.icon}

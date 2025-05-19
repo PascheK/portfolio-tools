@@ -105,4 +105,4 @@ This is a modern, full-stack portfolio management application built with **Next.
 - [ ] Display **user role** in the admin panel
 - [ ] Add a **project status** (draft, published, archived)
 - [ ] Add a **user profile page** to display saved favorites and activity
-- [ ] Modify the **storage image systeme** to manage useless images
+- [ ] Modify the **storage image system** to manage useless images
