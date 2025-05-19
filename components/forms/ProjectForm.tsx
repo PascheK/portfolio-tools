@@ -20,6 +20,8 @@ interface ProjectFormProps {
   richContent: string;
   setRichContent: React.Dispatch<React.SetStateAction<string>>;
   isSubmitting: boolean;
+  existingGallery: string[];
+  setExistingGallery: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 export default function ProjectForm({
@@ -33,13 +35,14 @@ export default function ProjectForm({
   richContent,
   setRichContent,
   isSubmitting,
+  existingGallery,
+  setExistingGallery,
 }: ProjectFormProps) {
   const [showRichEditor, setShowRichEditor] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewTitle, setPreviewTitle] = useState<string>("Preview");
-  const [existingGallery, setExistingGallery] = useState<string[]>(form.images || []);
   const [existingCover, setExistingCover] = useState<string | null>(form.image || null);
 
   // Handle form field updates
@@ -231,10 +234,14 @@ export default function ProjectForm({
               Additional images
             </label>
             <div className="max-h-56 overflow-y-auto pr-1 space-y-2 mb-2">
-              {[...existingGallery, ...galleryFiles].map((item, index) => {
-                const isFile = item instanceof File;
-                const name = isFile ? item.name : item.split("/").pop() ?? "Image";
-                const preview = isFile ? URL.createObjectURL(item) : item;
+            {[...existingGallery, ...galleryFiles].filter(Boolean).map((item, index) => {
+              const isFile = item instanceof File;
+              const name = isFile
+                ? item.name
+                : typeof item === "string"
+                ? item.split("/").pop() ?? "Image"
+                : "Image";
+              const preview = isFile ? URL.createObjectURL(item) : item;
               
                 return (
                   <div
@@ -355,11 +362,11 @@ export default function ProjectForm({
       {/* Preview modal */}
       {previewUrl && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
           onClick={() => setPreviewUrl(null)}
         >
-          <div className="relative max-w-4xl w-full max-h-[90vh] p-4 bg-dark-surface rounded shadow-lg overflow-auto">
-            <h2 className="text-white text-lg mb-2">{previewTitle}</h2>
+          <div className="relative max-w-4xl w-full max-h-[90vh] p-4 bg-surface dark:bg-dark-surface text-text dark:text-dark-text rounded shadow-lg overflow-auto">
+            <h2 className=" text-lg mb-2">{previewTitle}</h2>
             <img
               src={previewUrl}
               alt="Preview"
@@ -367,7 +374,7 @@ export default function ProjectForm({
             />
             <button
               onClick={() => setPreviewUrl(null)}
-              className="absolute top-4 right-4 bg-red-600 text-white rounded px-3 py-1 hover:bg-red-700"
+              className="absolute top-4 right-4 bg-red-600  rounded px-3 py-1 hover:bg-red-700"
             >
               Close
             </button>

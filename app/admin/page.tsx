@@ -4,13 +4,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/toast/ToastProvider";
 import { useEffect, useState } from "react";
 import {
-  listenToUserProjects,
+  listenToAllProjectsRealtime,
   createProject,
   updateProject,
   deleteProject,
-  getAllProjects
+  listenToUserProjectsRealtime,
 } from "@/services/projects";
-import { uploadImage } from "@/services/upload";
+import { uploadImage, deleteImage } from "@/services/upload";
 import { Project } from "@/models/project";
 import { useModal } from "@/hooks/useModal";
 import Modal from "@/components/modals/modal";
@@ -18,7 +18,6 @@ import { useRouter } from "next/navigation";
 import ProjectForm from "@/components/forms/ProjectForm";
 import ProjectList from "@/components/ProjectList";
 import ConfirmModal from "@/components/modals/ConfirmModal";
-
 
 export default function AdminPage() {
   const { user, loading, role } = useAuth();
@@ -31,120 +30,147 @@ export default function AdminPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [existingGallery, setExistingGallery] = useState<string[]>([]);
 
   const formModal = useModal();
   const { showToast } = useToast();
   const router = useRouter();
 
-  // Redirect to login if not authenticated
   useEffect(() => {
-     if(role === 'visitor'){
-        router.push("/");
-      }
-    if (!loading && !user) {
-             router.push("/");
-    }
+    if (role === "visitor") router.push("/");
+    if (!loading && !user) router.push("/");
   }, [user, loading]);
 
-  // Listen to the authenticated user's projects
   useEffect(() => {
-    const fetchProjects = async () => {
-      if (!user) return;
-      if (role === 'superadmin'){
-        const projects = await getAllProjects();
-        setProjects(projects);
-      } else {
-        const projects = await listenToUserProjects(user.uid);
-        setProjects(projects);
-      }
-    };
-    fetchProjects();
+    if (!user) return;
+  
+    let unsubscribe: () => void;
+  
+    if (role === "superadmin") {
+      unsubscribe = listenToAllProjectsRealtime(setProjects);
+    } else {
+      unsubscribe = listenToUserProjectsRealtime(user.uid, setProjects);
+    }
+  
+    return () => unsubscribe?.();
   }, [user, role]);
+
 
   if (loading) return <p>Loading...</p>;
   if (!user) return <p>Access denied.</p>;
 
-  // Handles project creation and update
-  const handleSubmit = async () => {
+  const resetForm = () => {
+    setIsSubmitting(false);
+    setForm({});
+    setEditId(null);
+    setCoverFile(null);
+    setGalleryFiles([]);
+    setRichContent("");
+    formModal.close();
+  };
+
+  const handleCreate = async () => {
     if (!form.title || !form.description || !form.category || !user) {
       showToast("Please fill all required fields.", "error");
       return;
     }
-
     setIsSubmitting(true);
     try {
-      // Upload cover image if changed
-      let imageUrl: string | undefined = form.image || undefined;
-      if (coverFile) {
-        imageUrl = await uploadImage(coverFile, `projects/${user.uid}/cover-${Date.now()}`);
-      }
+      const imageUrl = coverFile
+        ? await uploadImage(coverFile, `projects/${user.uid}/cover-${Date.now()}`)
+        : "";
 
-      // Upload new gallery images
-      let imageUrls: string[] = form.images || [];
-      if (galleryFiles.length > 0) {
-        const uploaded = await Promise.all(
-          galleryFiles.map((file) =>
-            uploadImage(file, `projects/${user.uid}/gallery/${Date.now()}-${file.name}`)
-          )
-        );
-        imageUrls = [...imageUrls, ...uploaded];
-      }
+      const uploadedGallery = await Promise.all(
+        galleryFiles.map((file) =>
+          uploadImage(file, `projects/${user.uid}/gallery/${Date.now()}-${file.name}`)
+        )
+      );
 
-      const newProjectData: Omit<Project, "id" | "createdAt" | "ownerUID"> = {
+      const data: Omit<Project, "id" | "createdAt" | "ownerUID"> = {
         title: form.title,
         description: form.description,
         category: form.category,
         fullDescription: richContent,
         url: form.url || "",
-        image: imageUrl || "",
-        images: imageUrls,
+        image: imageUrl,
+        images: uploadedGallery,
         isPublished: true,
       };
 
-      if (editId) {
-        await updateProject(editId, newProjectData);
-        showToast("Project updated successfully", "success");
-      } else {
-        await createProject(newProjectData, user.uid);
-        showToast("Project created successfully", "success");
-      }
-    } catch (error) {
-      console.error("Error while uploading or saving project:", error);
-      showToast("Failed to save project", "error");
+      await createProject(data, user.uid);
+      showToast("Project created successfully", "success");
+    } catch (err) {
+      showToast("Failed to create project", "error");
     } finally {
-      setIsSubmitting(false);
-      setForm({});
-      setEditId(null);
-      setCoverFile(null);
-      setGalleryFiles([]);
-      setRichContent("");
-      formModal.close();
+      resetForm();
     }
   };
 
-  // Load selected project in form for editing
+  const handleUpdate = async () => {
+    if (!form.title || !form.description || !form.category || !user || !editId) {
+      showToast("Please fill all required fields.", "error");
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const imageUrl = coverFile
+        ? await uploadImage(coverFile, `projects/${user.uid}/cover-${Date.now()}`)
+        : form.image || "";
+
+      const uploadedGallery = await Promise.all(
+        galleryFiles.map((file) =>
+          uploadImage(file, `projects/${user.uid}/gallery/${Date.now()}-${file.name}`)
+        )
+      );
+
+      const data: Omit<Project, "id" | "createdAt" | "ownerUID"> = {
+        title: form.title,
+        description: form.description,
+        category: form.category,
+        fullDescription: richContent,
+        url: form.url || "",
+        image: imageUrl,
+        images: [...existingGallery, ...uploadedGallery],        isPublished: true,
+      };
+
+      await updateProject(editId, data);
+      showToast("Project updated successfully", "success");
+    } catch (err) {
+      showToast("Failed to update project", "error");
+    } finally {
+      resetForm();
+    }
+  };
+
   const handleEdit = (project: Project) => {
     setForm(project);
     setEditId(project.id);
     setRichContent(project.fullDescription || "");
     setCoverFile(null);
     setGalleryFiles([]);
+    setExistingGallery(project.images || []);
     formModal.open();
   };
 
-  // Ask for confirmation before deletion
   const handleDelete = (id: string) => {
     setDeleteId(id);
     setConfirmOpen(true);
   };
 
-  // Confirm and proceed with project deletion
   const confirmDelete = async () => {
     if (!deleteId) return;
-    await deleteProject(deleteId);
-    setDeleteId(null);
-    setConfirmOpen(false);
-    showToast("Project deleted successfully", "success");
+    const project = projects.find(p => p.id === deleteId);
+    try {
+      if (project?.image) await deleteImage(project.image);
+      await Promise.all((project?.images || []).map(deleteImage));
+      await deleteProject(deleteId);
+      showToast("Project deleted successfully", "success");
+    } catch {
+      showToast("Failed to delete project", "error");
+    } finally {
+      setDeleteId(null);
+      setConfirmOpen(false);
+    }
   };
 
   return (
@@ -165,15 +191,13 @@ export default function AdminPage() {
         Add a new project
       </button>
 
-      {/* Display the list of projects */}
       <ProjectList projects={projects} onEdit={handleEdit} onDelete={handleDelete} />
 
-      {/* Modal containing the project form */}
       <Modal isOpen={formModal.isOpen} onClose={formModal.close} title="Add a project">
         <ProjectForm
           form={form}
           setForm={setForm}
-          onSubmit={handleSubmit}
+          onSubmit={editId ? handleUpdate : handleCreate}
           coverFile={coverFile}
           setCoverFile={setCoverFile}
           galleryFiles={galleryFiles}
@@ -181,10 +205,11 @@ export default function AdminPage() {
           richContent={richContent}
           setRichContent={setRichContent}
           isSubmitting={isSubmitting}
+          existingGallery={existingGallery}
+          setExistingGallery={setExistingGallery}
         />
       </Modal>
 
-      {/* Confirmation modal for deletion */}
       <ConfirmModal
         isOpen={confirmOpen}
         message="Are you sure you want to delete this project? This action cannot be undone."

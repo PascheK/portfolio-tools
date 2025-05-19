@@ -4,13 +4,13 @@ import { User } from "firebase/auth"; // Firebase User type
 import { UserRole, AppUser } from "@/models/user";
 
 // List of superadmin email addresses
-const SUPERADMINS: string[] = ["killianp@unops.org", "lionelf@unops.org"]; // Update this list as needed
+const SUPERADMINS: string[] = ["killianp@unops.org", "lionelf@unops.org", "roryc@unops.org"]; // Update this list as needed
 
 // Determine the role based on email domain or predefined list
 const assignRole = (user: User): UserRole => {
   const email = user.email ?? "";
   if (SUPERADMINS.includes(email)) return "superadmin";
-  if (email.endsWith("@unops.org")) return "admin";
+  //if (email.endsWith("@unops.org")) return "admin";
   return "visitor";
 };
 

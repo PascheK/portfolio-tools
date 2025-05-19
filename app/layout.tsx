@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Portfolio tools", 
-  description: "A collection of tools to help",
+  title: "UNOPS - COMPASS", 
+  description: "UNOPS - COMPASS",
 };
 
 export default function RootLayout({

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
@@ -17,8 +18,17 @@ export default function Navbar() {
     <>
       {/* Top navigation bar */}
       <nav className="transition-colors bg-background dark:bg-dark-background text-text dark:text-dark-text px-4 py-3 shadow-md flex justify-between items-center">
-        <Link href="/" className="text-xl font-bold">
-          Compass Landing Page
+        <Link href="/" className="text-3xl font-semibold flex items-center gap-2 text-[#0092d1] ">
+        <Image
+          src="/logo-full.svg"
+          alt="logo"
+          width={160}
+          height={50}
+        />
+        <span className="hidden h-auto lg:block">
+          COMPASS
+        </span>
+          
         </Link>
 
         {/* Desktop navigation */}
