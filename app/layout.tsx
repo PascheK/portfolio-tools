@@ -1,24 +1,15 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { ToastProvider } from "@/components/toast/ToastProvider";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
-  title: "UNOPS - COMPASS", 
-  description: "UNOPS - COMPASS",
+  title: "UNOPS - GPO Compass AI", 
+  description: "UNOPS - GPO Compass AI",
 };
 
 export default function RootLayout({
@@ -29,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen transition-colors bg-surface  dark:bg-dark-surface text-text  dark:text-dark-text`}
+        className={`font-sans antialiased flex flex-col min-h-screen transition-colors bg-surface  dark:bg-dark-surface text-text  dark:text-dark-text`}
       >
         <ThemeProvider>
          <ToastProvider>

@@ -25,9 +25,7 @@ export default function Navbar() {
           width={160}
           height={50}
         />
-        <span className="hidden h-auto lg:block">
-          COMPASS
-        </span>
+
           
         </Link>
 
