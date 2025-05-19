@@ -31,7 +31,6 @@ export function useAuth() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
-
       if(user){
         await createUserIfNotExists(user);
         const userRole = await getUserRole(user.uid);

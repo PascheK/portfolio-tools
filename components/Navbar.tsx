@@ -13,7 +13,6 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const toggleSidebar = () => setIsOpen((prev) => !prev);
   const closeSidebar = () => setIsOpen(false);
-  console.log("User in Navbar:", user);
   return (
     <>
       {/* Top navigation bar */}
